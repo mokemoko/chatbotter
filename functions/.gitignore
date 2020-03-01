@@ -1,0 +1,4 @@
+node_modules/
+credentials.yml
+conf/*
+!conf/sample.yml
