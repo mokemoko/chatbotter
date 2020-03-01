@@ -1,5 +1,5 @@
 const functions = require('firebase-functions');
-const rules = require('../util/conf');
+const { config } = require('../util/conf');
 
 function parseMessage(body) {
   // TODO: 必要項目の抽出
@@ -7,26 +7,27 @@ function parseMessage(body) {
   return body.event;
 }
 
-function handleMessage(msg) {
-  rules.forEach(rule => {
+async function handleMessage(msg) {
+  await Promise.all(config.map(async rule => {
     if (isMatchRule(msg, rule)) {
-      const res = rule.transform.reduce((prev, conf) => require(`../transform/${conf.type}`)(conf, prev), msg);
-      rule.destination.forEach(conf => require(`../destination/${conf.type}`)(conf, res));
+      let res = msg;
+      await Promise.all(rule.transform.map(async conf => res = await require(`../transform/${conf.type}`)(conf, res)));
+      await Promise.all(rule.destination.map(async conf => await require(`../destination/${conf.type}`)(conf, res)));
     }
-  });
+  }));
 }
 
 function isMatchRule(msg, rule) {
   return true;
 }
 
-exports.webhook = functions.https.onRequest((req, res) => {
+exports.webhook = functions.https.onRequest(async (req, res) => {
   if (req.body.challenge) {
     return res.json({challenge: req.body.challenge});
   }
 
   const msg = parseMessage(req.body);
-  handleMessage(msg);
+  await handleMessage(msg);
 
   res.json({});
 });

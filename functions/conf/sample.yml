@@ -1,0 +1,14 @@
+---
+disabled: true
+source:
+  - type: webhook
+    team: ""
+    channel: ""
+    text: ""
+transform:
+  - type: raw
+destination:
+  - type: slack
+    team: ""
+    channel: ""
+    text: ""

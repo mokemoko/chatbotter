@@ -1,10 +1,11 @@
 const slack = require('../util/slack');
 
 function reflect(conf, msg) {
-  return msg;
+  // TODO: 必要項目のみ上書くように
+  return Object.assign(msg, conf);
 }
 
-module.exports = (conf, msg) => {
+module.exports = async (conf, msg) => {
   const res = reflect(conf, msg);
-  slack.post(res);
+  await slack.post(res);
 };
