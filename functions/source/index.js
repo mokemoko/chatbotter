@@ -2,6 +2,8 @@ const functions = require('firebase-functions');
 const { config } = require('../util/conf');
 const { isOwnMsg } = require('../util/slack');
 
+const regexp_params = ['team', 'channel', 'text'];
+
 function parseMessage(body) {
   // TODO: 必要項目の抽出
   // bodyを丸っと引き渡してしまった方が良い？
@@ -22,13 +24,19 @@ async function handleMessage(msg) {
 }
 
 function isMatchRule(msg, rule) {
+  // TODO: improve
+  rule = rule.source.find(e => e.type === 'webhook');
   if (isOwnMsg(msg)) {
     console.log("ignore own message");
+    return false;
+  }
+  if (regexp_params.find(e => rule[e] && !msg[e].match(new RegExp(rule[e])))) {
     return false;
   }
   return true;
 }
 
+// TODO: separate
 exports.webhook = functions.https.onRequest(async (req, res) => {
   if (req.body.challenge) {
     return res.json({challenge: req.body.challenge});
