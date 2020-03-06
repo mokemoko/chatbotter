@@ -45,5 +45,5 @@ exports.webhook = functions.https.onRequest(async (req, res) => {
   const msg = parseMessage(req.body);
   await handleMessage(msg);
 
-  res.json({});
+  return res.json({});
 });
