@@ -4,6 +4,10 @@ const { isOwnMsg } = require('../util/slack');
 
 const regexp_params = ['team', 'channel', 'text'];
 
+function logMessage({ team, channel, ts, text }) {
+  console.log({ team, channel, ts, text: (text || '').substring(0, 10)});
+}
+
 function parseMessage(body) {
   // TODO: 必要項目の抽出
   // bodyを丸っと引き渡してしまった方が良い？
@@ -27,7 +31,12 @@ function isMatchRule(msg, rule) {
   // TODO: improve
   rule = rule.source.find(e => e.type === 'webhook');
   if (isOwnMsg(msg)) {
-    console.log("ignore own message");
+    console.log('ignore own message');
+    return false;
+  }
+  // TODO:
+  if (['message_changed'].includes(msg.subtype)) {
+    console.log(`ignore ${msg.subtype}`);
     return false;
   }
   if (regexp_params.find(e => rule[e] && !msg[e].match(new RegExp(rule[e])))) {
@@ -43,6 +52,7 @@ exports.webhook = functions.https.onRequest(async (req, res) => {
   }
 
   const msg = parseMessage(req.body);
+  logMessage(msg);
   await handleMessage(msg);
 
   return res.json({});
