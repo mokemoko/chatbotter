@@ -1,19 +1,23 @@
 const functions = require('firebase-functions');
 const { config } = require('../util/conf');
-const { isOwnMsg } = require('../util/slack');
+const { isOwnMsg, getUseInfo, getChannelInfo } = require('../util/slack');
 
-const regexp_params = ['team', 'channel', 'text'];
+const regexp_params = ['team', 'channel', 'channel_name', 'user', 'text'];
 
-function logMessage({ team, channel, ts, text }) {
-  console.log({ team, channel, ts, text: (text || '').substring(0, 10)});
+function logMessage({ team, channel, channel_name, ts, text }) {
+  console.log(JSON.stringify({ team, channel, channel_name, ts, text }));
 }
 
-function parseMessage(body) {
+async function parseMessage(body) {
   // TODO: 必要項目の抽出
   // bodyを丸っと引き渡してしまった方が良い？
   const msg = body.event;
   // fileアップロード時など、何故かevent内にteamが含まれないことがあるためその考慮
   msg.team = msg.team || body.team_id;
+
+  const channel = await getChannelInfo(msg);
+  msg.channel_name = channel.name;
+
   return msg;
 }
 
@@ -51,7 +55,7 @@ exports.webhook = functions.https.onRequest(async (req, res) => {
     return res.json({challenge: req.body.challenge});
   }
 
-  const msg = parseMessage(req.body);
+  const msg = await parseMessage(req.body);
   logMessage(msg);
   await handleMessage(msg);
 

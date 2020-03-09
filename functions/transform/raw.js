@@ -1,1 +1,4 @@
-module.exports = (conf, msg) => msg;
+module.exports = (conf, msg) => {
+  delete conf.type;
+  return Object.assign(msg, conf);
+};

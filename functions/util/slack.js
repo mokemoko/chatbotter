@@ -1,5 +1,6 @@
 const { WebClient } = require('@slack/web-api');
 const { credential } = require('./conf');
+const { get, set } = require('./cache');
 
 const teams = {};
 credential.slack.map(e => teams[e.team] = { client: new WebClient(e.token), bot_id: e.bot_id });
@@ -15,21 +16,28 @@ function isOwnMsg(msg) {
 }
 
 async function post(msg) {
+  console.log(JSON.stringify(msg));
   await getClient(msg.team).chat.postMessage(msg);
 }
 
-// TODO: remove
-const users = {};
-async function fetchUsers(team) {
-  const list = [];
-  for await (const page of getClient(team).paginate('users.list', {name: 'value'})) {
-    list.push(...page.members);
-  }
-  users[team] = list;
-}
-
 async function getUserInfo({ team, user }) {
-  return (await getClient(team).users.info({user})).user;
+  const cache = get(team, user);
+  if (cache) return cache;
+
+  console.log(`cache not hit. get ${user}`)
+  const info = (await getClient(team).users.info({user})).user;
+  set(team, user, info);
+  return info;
 }
 
-module.exports = { isOwnMsg, post, getUserInfo };
+async function getChannelInfo({ team, channel }) {
+  const cache = get(team, channel);
+  if (cache) return cache;
+
+  console.log(`cache not hit. get ${channel}`)
+  const info = (await getClient(team).conversations.info({channel})).channel;
+  set(team, channel, info);
+  return info;
+}
+
+module.exports = { isOwnMsg, post, getUserInfo, getChannelInfo };

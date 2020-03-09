@@ -2,6 +2,7 @@ const slack = require('../util/slack');
 
 function reflect(conf, msg) {
   // TODO: 必要項目のみ上書くように
+  delete conf.type;
   return Object.assign(msg, conf);
 }
 
