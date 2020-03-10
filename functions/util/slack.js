@@ -35,6 +35,11 @@ async function getChannelInfo({ team, channel }) {
   if (cache) return cache;
 
   console.log(`cache not hit. get ${channel}`)
+  // TODO: for debug purpose. improve future.
+  if (!teams[team]) {
+    console.error(`team ${team} not detected`);
+    return {};
+  }
   const info = (await getClient(team).conversations.info({channel})).channel;
   set(team, channel, info);
   return info;

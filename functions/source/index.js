@@ -23,10 +23,11 @@ async function parseMessage(body) {
 
 async function handleMessage(msg) {
   await Promise.all(config.map(async rule => {
+    // TODO: deep copy
+    msg = Object.assign({}, msg);
     if (isMatchRule(msg, rule)) {
-      let res = msg;
-      await Promise.all(rule.transform.map(async conf => res = await require(`../transform/${conf.type}`)(conf, res)));
-      await Promise.all(rule.destination.map(async conf => await require(`../destination/${conf.type}`)(conf, res)));
+      await Promise.all(rule.transform.map(async conf => msg = await require(`../transform/${conf.type}`)(Object.assign({}, conf), msg)));
+      await Promise.all(rule.destination.map(async conf => await require(`../destination/${conf.type}`)(Object.assign({}, conf), msg)));
     }
   }));
 }
