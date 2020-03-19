@@ -26,7 +26,9 @@ async function handleMessage(msg) {
     // TODO: deep copy
     let res = Object.assign({}, msg);
     if (isMatchRule(res, rule)) {
-      await Promise.all(rule.transform.map(async conf => res = await require(`../transform/${conf.type}`)(Object.assign({}, conf), res)));
+      // tranformは直列実行
+      await rule.transform.map(conf => async () => res = await require(`../transform/${conf.type}`)(Object.assign({}, conf), res))
+        .reduce((p, m) => p.then(m), Promise.resolve());
       await Promise.all(rule.destination.map(async conf => await require(`../destination/${conf.type}`)(Object.assign({}, conf), res)));
     }
   }));
@@ -34,17 +36,19 @@ async function handleMessage(msg) {
 
 function isMatchRule(msg, rule) {
   // TODO: improve
-  rule = rule.source.find(e => e.type === 'webhook');
+  rule = Object.assign({}, rule.source.find(e => e.type === 'webhook'));
+  delete rule.type;
   if (isOwnMsg(msg)) {
     console.log('ignore own message');
     return false;
   }
-  // TODO:
+  // TODO: 
   if (['message_changed'].includes(msg.subtype)) {
     console.log(`ignore ${msg.subtype}`);
     return false;
   }
-  if (regexp_params.find(e => rule[e] && !msg[e].match(new RegExp(rule[e])))) {
+  // TODO: use object-path
+  if (Object.keys(rule).find(key => !(msg[key] || '').match(new RegExp(rule[key])))) {
     return false;
   }
   return true;
