@@ -7,7 +7,21 @@ source:
     channel: ""
     text: ""
 transform:
-  - type: raw
+  # インプットのメッセージをそのままの形で投稿できるように整形
+  - type: proxy
+  - type: csv
+    file: SOURCE_CSV_PATH
+    match_column: 1
+    match_path: 'files.0.plain_text'
+    res_column: 2
+    res_path: text
+    nomatch_text: 'NO MATCH RULE'
+  - type: copy
+    thread_ts: ts
+  - type: select
+    targets:
+      - team
+      - channel
 destination:
   - type: slack
     # 通知先team default: sourceと同じ
