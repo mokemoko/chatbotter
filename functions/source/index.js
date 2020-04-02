@@ -54,15 +54,20 @@ function isMatchRule(msg, rule) {
   return true;
 }
 
+async function executeAsync(req) {
+  const msg = await parseMessage(req.body);
+  logMessage(msg);
+  return await handleMessage(msg);
+}
+
 // TODO: separate
 exports.webhook = functions.https.onRequest(async (req, res) => {
   if (req.body.challenge) {
     return res.json({challenge: req.body.challenge});
   }
 
-  const msg = await parseMessage(req.body);
-  logMessage(msg);
-  await handleMessage(msg);
+  // awaitしない
+  executeAsync(req);
 
   return res.json({});
 });
