@@ -60,8 +60,7 @@ async function executeAsync(req) {
   return await handleMessage(msg);
 }
 
-// TODO: separate
-module.exports = functions.https.onRequest(async (req, res) => {
+async function app(req, res) {
   if (req.body.challenge) {
     return res.json({challenge: req.body.challenge});
   }
@@ -70,4 +69,9 @@ module.exports = functions.https.onRequest(async (req, res) => {
   executeAsync(req);
 
   return res.json({});
-});
+}
+
+// TODO: separate
+module.exports = functions
+    .region('asia-northeast1')
+    .https.onRequest(app);
