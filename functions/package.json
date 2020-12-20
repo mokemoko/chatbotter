@@ -15,12 +15,12 @@
   "dependencies": {
     "@slack/web-api": "^5.7.0",
     "csv-parse": "^4.8.8",
-    "firebase-admin": "^8.6.0",
+    "firebase-admin": "^9.4.2",
     "firebase-functions": "^3.3.0",
     "js-yaml": "^3.13.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "lru-cache": "^5.1.1",
-    "object-path": "^0.11.4"
+    "object-path": "^0.11.5"
   },
   "devDependencies": {
     "eslint": "^5.12.0",
