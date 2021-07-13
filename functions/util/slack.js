@@ -3,7 +3,11 @@ const { credential } = require('./conf');
 const { get, set } = require('./cache');
 
 const teams = {};
-credential.slack.map(e => teams[e.team] = { client: new WebClient(e.token), bot_id: e.bot_id });
+credential.slack.map(e => teams[e.team] = {
+  client: new WebClient(e.token),
+  bot_id: e.bot_id,
+  team_domain: e.team_domain,
+});
 
 console.log(`Initialize ${Object.keys(teams).length} teams.`);
 
@@ -13,6 +17,19 @@ function getClient(team) {
 
 function isOwnMsg(msg) {
   return msg.bot_id && Object.values(teams).map(e => e.bot_id).includes(msg.bot_id);
+}
+
+function getMessageUrl(msg) {
+  const team_domain = teams[msg.team].team_domain;
+  const channel = msg.channel;
+  const ts = `p${msg.ts.replace('.', '')}`;
+  const url = `https://${team_domain}.slack.com/archives/${channel}/${ts}`;
+
+  if (msg.thread_ts) {
+    return `${url}?thread_ts=${msg.thread_ts}`;
+  } else {
+    return url;
+  }
 }
 
 async function post(msg) {
@@ -45,4 +62,4 @@ async function getChannelInfo({ team, channel }) {
   return info;
 }
 
-module.exports = { isOwnMsg, post, getUserInfo, getChannelInfo };
+module.exports = { isOwnMsg, post, getUserInfo, getChannelInfo, getMessageUrl };

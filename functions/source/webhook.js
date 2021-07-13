@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const { config } = require('../util/conf');
-const { isOwnMsg, getUseInfo, getChannelInfo } = require('../util/slack');
+const { isOwnMsg, getChannelInfo, getMessageUrl } = require('../util/slack');
 
 const regexp_params = ['team', 'channel', 'channel_name', 'user', 'text'];
 
@@ -17,6 +17,7 @@ async function parseMessage(body) {
 
   const channel = await getChannelInfo(msg);
   msg.channel_name = channel.name;
+  msg.url = getMessageUrl(msg);
 
   return msg;
 }
