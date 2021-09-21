@@ -20,7 +20,7 @@
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.21",
     "lru-cache": "^5.1.1",
-    "object-path": "^0.11.6"
+    "object-path": "^0.11.8"
   },
   "devDependencies": {
     "eslint": "^5.12.0",
