@@ -10,7 +10,7 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "14"
+    "node": "18"
   },
   "dependencies": {
     "@slack/web-api": "^6.9.1",
