@@ -39,6 +39,13 @@ function isMatchRule(msg, rule) {
   // TODO: improve
   rule = Object.assign({}, rule.source.find(e => e.type === 'webhook'));
   delete rule.type;
+
+  // TODO: transform modularize
+  if (rule.sample && rule.sample < Math.random()) {
+    return false;
+  }
+  delete rule.sample;
+
   if (isOwnMsg(msg)) {
     console.log('ignore own message');
     return false;
@@ -63,7 +70,7 @@ async function executeAsync(req) {
 
 async function app(req, res) {
   if (req.body.challenge) {
-    return res.json({challenge: req.body.challenge});
+    return res.json({ challenge: req.body.challenge });
   }
 
   // awaitしない
@@ -74,5 +81,5 @@ async function app(req, res) {
 
 // TODO: separate
 module.exports = functions
-    .region('asia-northeast1')
-    .https.onRequest(app);
+  .region('asia-northeast1')
+  .https.onRequest(app);
