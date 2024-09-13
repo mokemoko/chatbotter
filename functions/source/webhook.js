@@ -1,4 +1,5 @@
 const functions = require('firebase-functions');
+const { get } = require('object-path');
 const { config } = require('../util/conf');
 const { isOwnMsg, getChannelInfo, getMessageUrl } = require('../util/slack');
 
@@ -56,7 +57,7 @@ function isMatchRule(msg, rule) {
     return false;
   }
   // TODO: use object-path
-  if (Object.keys(rule).find(key => !(msg[key] || '').match(new RegExp(rule[key])))) {
+  if (Object.keys(rule).find(key => !(get(msg, key) || '').match(new RegExp(rule[key])))) {
     return false;
   }
   return true;

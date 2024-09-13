@@ -62,4 +62,24 @@ async function getChannelInfo({ team, channel }) {
   return info;
 }
 
-module.exports = { isOwnMsg, post, getUserInfo, getChannelInfo, getMessageUrl };
+async function uploadFile(msg) {
+  console.log(JSON.stringify(msg));
+  const client = await getClient(msg.team);
+  const file = await fetch(msg.file, {
+    headers: {
+      Authorization: `Bearer ${client.token}`
+    }
+  });
+  await client.filesUploadV2({
+    channel_id: msg.channel,
+    initial_comment: msg.text,
+    thread_ts: msg.thread_ts,
+    // 暫定的に1ファイルのみ対応
+    file_uploads: [{
+      file: Buffer.from(await file.arrayBuffer()),
+      filename: msg.filename,
+    }],
+  });
+}
+
+module.exports = { isOwnMsg, post, getUserInfo, getChannelInfo, getMessageUrl, uploadFile };

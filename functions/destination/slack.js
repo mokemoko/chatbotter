@@ -1,4 +1,4 @@
-const slack = require('../util/slack');
+const slack = require("../util/slack");
 
 function reflect(conf, msg) {
   delete conf.type;
@@ -7,10 +7,15 @@ function reflect(conf, msg) {
 
 module.exports = async (conf, msg) => {
   const res = reflect(conf, msg);
-  if (!res.text && !res.attachments && !res.blocks) {
+  if (!res.text && !res.attachments && !res.blocks && !res.file) {
     // 必須項目がない場合はAPIエラーを避けるためスキップ
-    console.log('[ignore] contents is empty.', JSON.stringify(res));
+    console.log("[ignore] contents is empty.", JSON.stringify(res));
     return;
   }
-  await slack.post(res);
+  if (res.file) {
+    // ファイルアップロード時
+    await slack.uploadFile(res);
+  } else {
+    await slack.post(res);
+  }
 };
